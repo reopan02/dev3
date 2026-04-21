@@ -5,11 +5,13 @@ import Home from './pages/Home'
 import Refer from './pages/Refer'
 import BuJiangWuDe from './pages/BuJiangWuDe'
 import Watermark from './pages/Watermark'
+import Seedream from './pages/Seedream'
 
 const NAV_ITEMS = [
   { path: '/', label: '\u9996\u9875' },
   { path: '/generate', label: '\u5361\u7247\u751f\u6210' },
   { path: '/refer', label: '\u98ce\u683c\u8fc1\u79fb' },
+  { path: '/seedream', label: 'Doubao Seedream' },
   { path: '/watermark', label: '\u6c34\u5370\u53bb\u9664' },
   { path: '/bujiangwude', label: '\u4e0d\u8bb2\u6b66\u5fb7' },
 ]
@@ -51,6 +53,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/generate" element={<Generate />} />
           <Route path="/refer" element={<Refer />} />
+          <Route path="/seedream" element={<Seedream />} />
           <Route path="/watermark" element={<Watermark />} />
           <Route path="/bujiangwude" element={<BuJiangWuDe />} />
         </Routes>

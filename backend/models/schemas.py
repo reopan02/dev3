@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import List, Optional, Union
 
 
 class AnalyzeRequest(BaseModel):
@@ -31,3 +31,17 @@ class FusePromptRequest(BaseModel):
 
 class RecognizeProductRequest(BaseModel):
     image: str
+
+
+class SeedreamGenerateRequest(BaseModel):
+    prompt: str = Field(..., min_length=1)
+    image: Optional[Union[str, List[str]]] = Field(default=None)
+    size: Optional[str] = Field(default="2K")
+    output_format: Optional[str] = Field(default="png")
+    response_format: Optional[str] = Field(default="b64_json")
+    watermark: Optional[bool] = Field(default=False)
+
+
+class SeedreamGenerateResponse(BaseModel):
+    generated_image: str
+    status: str = "success"

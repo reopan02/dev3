@@ -12,7 +12,7 @@ _root_env = Path(__file__).parent.parent / ".env"
 load_dotenv(_root_env)
 
 from config import get_settings
-from routers import generate, refer, watermark
+from routers import generate, refer, seedream, watermark
 
 app = FastAPI(title="AI Studio", version="1.0.0")
 
@@ -26,6 +26,7 @@ app.add_middleware(
 
 app.include_router(generate.router)
 app.include_router(refer.router)
+app.include_router(seedream.router)
 app.include_router(watermark.router)
 
 
@@ -36,6 +37,7 @@ async def app_config():
         "generateApiBase": settings.frontend_generate_api_path,
         "referApiBase": settings.frontend_refer_api_path,
         "watermarkApiBase": settings.frontend_watermark_api_path,
+        "seedreamApiBase": settings.frontend_seedream_api_path,
     }
     config_json = json.dumps(public_config, ensure_ascii=False)
     content = (

@@ -3,6 +3,7 @@ const DEFAULT_RUNTIME_CONFIG = {
   generateApiBase: '/api/generate',
   referApiBase: '/api/refer',
   watermarkApiBase: '/api/watermark',
+  seedreamApiBase: '/api/seedream',
 }
 
 function readRuntimeConfig() {
@@ -29,3 +30,4 @@ function requireConfigValue(key) {
 export const getGenerateApiBase = () => requireConfigValue('generateApiBase')
 export const getReferApiBase = () => requireConfigValue('referApiBase')
 export const getWatermarkApiBase = () => requireConfigValue('watermarkApiBase')
+export const getSeedreamApiBase = () => requireConfigValue('seedreamApiBase')

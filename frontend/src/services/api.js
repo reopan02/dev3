@@ -1,4 +1,5 @@
 import { getGenerateApiBase } from './runtimeConfig';
+import { getSeedreamApiBase } from './runtimeConfig';
 
 export const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -96,3 +97,37 @@ export const fusePromptStream = (analysisResult, productInfo, onChunk, onDone, o
 
 export const recognizeProductStream = (imageBase64, onChunk, onDone, onError, signal) =>
   streamPost(`${getGenerateApiBase()}/recognize-product`, { image: imageBase64 }, onChunk, onDone, onError, signal);
+
+export const generateSeedreamImage = async ({
+  prompt,
+  image = null,
+  size = '2K',
+  outputFormat = 'png',
+  watermark = false,
+}) => {
+  let response;
+  try {
+    response = await fetch(`${getSeedreamApiBase()}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        image,
+        size,
+        output_format: outputFormat,
+        response_format: 'b64_json',
+        watermark,
+      }),
+    });
+  } catch (error) {
+    throw new Error('无法连接 Seedream 服务，请确认前后端服务正在运行。');
+  }
+
+  if (!response.ok) {
+    let detail = '豆包图片生成失败';
+    try { const error = await response.json(); detail = error.detail || detail; } catch {}
+    throw new Error(detail);
+  }
+
+  return response.json();
+};

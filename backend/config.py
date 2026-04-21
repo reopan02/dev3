@@ -91,6 +91,24 @@ class Settings(BaseSettings):
         default="/api/watermark",
         validation_alias=AliasChoices("frontend_watermark_api_path", "FRONTEND_WATERMARK_API_PATH")
     )
+    frontend_seedream_api_path: str = Field(
+        default="/api/seedream",
+        validation_alias=AliasChoices("frontend_seedream_api_path", "FRONTEND_SEEDREAM_API_PATH")
+    )
+
+    # === Doubao Seedream Tool ===
+    doubao_api_key: Optional[SecretStr] = Field(
+        default=None,
+        validation_alias=AliasChoices("doubao_api_key", "DOUBAO_API_KEY")
+    )
+    doubao_base_url: str = Field(
+        default="https://yunwu.ai",
+        validation_alias=AliasChoices("doubao_base_url", "DOUBAO_BASE_URL")
+    )
+    doubao_seedream_model: str = Field(
+        default="doubao-seedream-5-0-260128",
+        validation_alias=AliasChoices("doubao_seedream_model", "DOUBAO_SEEDREAM_MODEL")
+    )
 
     # === Server ===
     port: int = Field(default=8000, validation_alias=AliasChoices("port", "PORT"))

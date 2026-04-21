@@ -1,0 +1,189 @@
+.seedream-page {
+  --seedream-ink: #161512;
+  --seedream-paper: rgba(255, 252, 244, 0.92);
+  --seedream-wash: rgba(108, 95, 69, 0.08);
+  --seedream-line: rgba(22, 21, 18, 0.12);
+  --seedream-accent: #8a5a2b;
+}
+
+.seedream-page .hero-block {
+  gap: 10px;
+  margin-bottom: 22px;
+}
+
+.seedream-page .hero-title {
+  max-width: none;
+  font-size: clamp(36px, 5.2vw, 58px);
+}
+
+.seedream-page .hero-description {
+  max-width: 420px;
+  font-size: 14px;
+  line-height: 1.65;
+}
+
+.seedream-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.seedream-panel {
+  background:
+    linear-gradient(180deg, rgba(255, 253, 248, 0.98), rgba(250, 247, 239, 0.96)),
+    var(--seedream-paper);
+  border-color: var(--seedream-ink);
+  box-shadow: 0 18px 44px rgba(32, 24, 12, 0.08);
+}
+
+.seedream-panel::before {
+  background:
+    radial-gradient(circle at top right, rgba(138, 90, 43, 0.08), transparent 24%),
+    radial-gradient(circle at bottom left, rgba(22, 21, 18, 0.04), transparent 28%);
+}
+
+.seedream-compact {
+  display: grid;
+  gap: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+.seedream-toolbar {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.seedream-meta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.seedream-field {
+  display: grid;
+  gap: 6px;
+}
+
+.seedream-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.seedream-note {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--seedream-line);
+  background: var(--seedream-wash);
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.seedream-size {
+  font-family: var(--font-display);
+  font-size: 20px;
+  line-height: 1;
+  color: var(--seedream-ink);
+}
+
+.seedream-rail {
+  display: grid;
+  gap: 10px;
+}
+
+.seedream-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--seedream-line);
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.seedream-status strong {
+  color: var(--seedream-ink);
+  font-weight: 600;
+}
+
+.seedream-result-card {
+  min-height: 560px;
+}
+
+.seedream-empty {
+  min-height: 460px;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  border: 1px dashed var(--seedream-line);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6), rgba(244, 239, 229, 0.64));
+  color: var(--text-muted);
+  text-align: center;
+  padding: 28px;
+}
+
+.seedream-empty strong {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--seedream-ink);
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 400;
+}
+
+.seedream-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.seedream-page .prompt-editor {
+  min-height: 180px;
+  background: rgba(255, 255, 255, 0.78);
+}
+
+.seedream-page .studio-select,
+.seedream-page .prompt-editor {
+  border-color: var(--seedream-line);
+}
+
+.seedream-page .glass-button.primary {
+  background: var(--seedream-ink);
+}
+
+.seedream-page .glass-button {
+  min-height: 42px;
+}
+
+@media (max-width: 1100px) {
+  .seedream-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .seedream-result-card {
+    min-height: unset;
+  }
+}
+
+@media (max-width: 720px) {
+  .seedream-toolbar,
+  .seedream-meta {
+    grid-template-columns: 1fr;
+  }
+
+  .seedream-empty {
+    min-height: 280px;
+  }
+}
