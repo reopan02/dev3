@@ -113,10 +113,10 @@ export default function Seedream() {
 
   return (
     <main className="page-shell seedream-page">
-      <section className="hero-block" style={{ marginBottom: '24px' }}>
+      <section className="hero-block">
         <p className="hero-kicker">Seedream</p>
         <h1 className="hero-title">Doubao Seedream 5.0</h1>
-        <p className="hero-description">文生图、多图参考、并发输出。</p>
+        <p className="hero-description">支持文生图、参考图输入和并发输出。</p>
       </section>
 
       <section className="seedream-layout">
@@ -168,9 +168,15 @@ export default function Seedream() {
               </div>
             </div>
 
-            <div className="seedream-note">
-              <span>Output size</span>
-              <span className="seedream-size">{effectiveSize}</span>
+            <div className="seedream-note-grid">
+              <div className="seedream-note">
+                <span>Output size</span>
+                <span className="seedream-size">{effectiveSize}</span>
+              </div>
+              <div className="seedream-note">
+                <span>Input mode</span>
+                <span className="seedream-note-value">{images.length > 0 ? `${images.length} refs` : 'Prompt only'}</span>
+              </div>
             </div>
 
             <div className="seedream-meta">
@@ -187,19 +193,19 @@ export default function Seedream() {
                   style={{ width: '88px' }}
                 />
               </div>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '13px', color: 'var(--text-primary)', paddingTop: '20px' }}>
+              <label className="seedream-toggle seedream-checkbox">
                 <input
                   type="checkbox"
                   checked={watermark}
                   onChange={(event) => setWatermark(event.target.checked)}
                   disabled={loading}
                 />
-                Watermark
+                <span>Watermark</span>
               </label>
             </div>
 
             <div className="seedream-actions">
-              <button className="glass-button primary" onClick={handleSubmit} disabled={!canSubmit} style={{ minWidth: '168px' }}>
+              <button className="glass-button primary seedream-submit" onClick={handleSubmit} disabled={!canSubmit} style={{ minWidth: '168px' }}>
                 {loading ? <><span className="loading-spinner" />{progress.done}/{progress.total}</> : 'Generate'}
               </button>
             </div>

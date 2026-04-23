@@ -40,6 +40,7 @@ class SeedreamGenerateRequest(BaseModel):
     output_format: Optional[str] = Field(default="png")
     response_format: Optional[str] = Field(default="b64_json")
     watermark: Optional[bool] = Field(default=False)
+    model: Optional[str] = Field(default=None)
 
 
 class SeedreamGenerateResponse(BaseModel):

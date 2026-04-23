@@ -68,7 +68,6 @@ export default function MultiImageUploader({ label, value, onChange, maxCount = 
         onDrop={handleDrop}
         onPaste={handlePaste}
         tabIndex={disabled ? -1 : 0}
-        style={{ padding: '16px' }}
       >
         <input
           ref={inputRef}
@@ -80,33 +79,36 @@ export default function MultiImageUploader({ label, value, onChange, maxCount = 
           disabled={disabled}
         />
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', marginBottom: '12px' }}>
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-            最多 {maxCount} 张，支持上传、拖拽和粘贴。多图时按文档作为 `image` 数组发送。
+        <div className="upload-toolbar">
+          <div className="upload-toolbar-copy">
+            <div className="upload-toolbar-title">Reference Set</div>
+            <div className="upload-toolbar-text">
+              最多 {maxCount} 张，支持上传、拖拽和粘贴。多图时按 `image` 数组发送。
+            </div>
           </div>
-          <button type="button" className="glass-button" disabled={disabled || (value || []).length >= maxCount} onClick={() => inputRef.current?.click()}>
+          <button type="button" className="glass-button upload-primary-btn" disabled={disabled || (value || []).length >= maxCount} onClick={() => inputRef.current?.click()}>
             添加图片
           </button>
         </div>
 
         {(value || []).length > 0 ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '12px' }}>
+          <div className="multi-upload-grid">
             {(value || []).map((item, index) => (
-              <div key={item.id} style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', border: '1px solid var(--border-subtle)', background: 'var(--bg-secondary)' }}>
+              <div key={item.id} className="multi-upload-card">
                 <img
                   src={item.dataUrl}
                   alt={item.name || `参考图 ${index + 1}`}
-                  style={{ width: '100%', aspectRatio: '1 / 1', objectFit: 'cover', display: 'block' }}
+                  className="multi-upload-image"
                 />
-                <div style={{ padding: '8px 10px', fontSize: '12px', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  图 {index + 1}
+                <div className="multi-upload-meta">
+                  <span>图 {index + 1}</span>
+                  <span className="multi-upload-name" title={item.name}>{item.name}</span>
                 </div>
                 <button
                   type="button"
                   className="image-clear-btn"
                   onClick={() => removeImage(item.id)}
                   title="移除图片"
-                  style={{ position: 'absolute', top: '8px', right: '8px' }}
                 >
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="18" x2="6" y1="6" y2="18" />
@@ -117,14 +119,28 @@ export default function MultiImageUploader({ label, value, onChange, maxCount = 
             ))}
           </div>
         ) : (
-          <div className="upload-placeholder" style={{ minHeight: '180px' }}>
-            <div className="upload-text">
-              <button type="button" className="upload-btn" onClick={() => inputRef.current?.click()}>
-                点击上传多张参考图
-              </button>
-              <span> 或拖拽到此处</span>
+          <div className="upload-placeholder upload-placeholder-large">
+            <div className="upload-icon-shell">
+              <div className="upload-icon">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="17 8 12 3 7 8" />
+                  <line x1="12" x2="12" y1="3" y2="15" />
+                </svg>
+              </div>
             </div>
-            <div className="upload-hint">支持单图图生图、多图融合和多参考图生图</div>
+            <div className="upload-copy">
+              <div className="upload-title">上传多张参考图</div>
+              <div className="upload-text">适合图生图、多图融合与多参考混合生成。</div>
+            </div>
+            <div className="upload-actions">
+              <button type="button" className="glass-button upload-primary-btn" onClick={() => inputRef.current?.click()}>
+                选择多张图片
+              </button>
+              <span className="upload-chip">Max {maxCount}</span>
+              <span className="upload-chip">Drag & Paste</span>
+            </div>
+            <div className="upload-hint">支持拖拽到此处，或点击后直接粘贴截图。</div>
           </div>
         )}
       </div>

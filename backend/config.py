@@ -95,6 +95,10 @@ class Settings(BaseSettings):
         default="/api/seedream",
         validation_alias=AliasChoices("frontend_seedream_api_path", "FRONTEND_SEEDREAM_API_PATH")
     )
+    frontend_gptimage2_api_path: str = Field(
+        default="/api/gptimage2",
+        validation_alias=AliasChoices("frontend_gptimage2_api_path", "FRONTEND_GPTIMAGE2_API_PATH")
+    )
 
     # === Doubao Seedream Tool ===
     doubao_api_key: Optional[SecretStr] = Field(

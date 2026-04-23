@@ -1,5 +1,19 @@
-import { getGenerateApiBase } from './runtimeConfig';
-import { getSeedreamApiBase } from './runtimeConfig';
+import { getGenerateApiBase, getSeedreamApiBase, getGptImage2ApiBase } from './runtimeConfig';
+
+const SEEDREAM_MODELS = new Set(['doubao-seedream-5-0-260128'])
+
+const SEEDREAM_SIZE_MAP = {
+  '2K': {
+    '1:1': '2048x2048', '4:3': '2304x1728', '3:4': '1728x2304',
+    '16:9': '2848x1600', '9:16': '1600x2848', '3:2': '2496x1664',
+    '2:3': '1664x2496', '21:9': '3136x1344',
+  },
+  '3K': {
+    '1:1': '3072x3072', '4:3': '3456x2592', '3:4': '2592x3456',
+    '16:9': '4096x2304', '9:16': '2304x4096', '3:2': '3744x2496',
+    '2:3': '2496x3744', '21:9': '4704x2016',
+  },
+}
 
 export const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
@@ -13,11 +27,35 @@ export const fileToBase64 = (file) => {
   });
 };
 
-export const generateImage = async (targetImageBase64, prompt, aspectRatio = '3:4', imageSize = '2K', model = 'gemini-3-pro-image-preview') => {
+export const generateImage = async (targetImages, prompt, aspectRatio = '3:4', imageSize = '2K', model = 'gemini-3-pro-image-preview') => {
+  const images = Array.isArray(targetImages) ? targetImages.filter(Boolean) : (targetImages ? [targetImages] : [])
+
+  if (model === 'gpt-image-2') {
+    const result = await generateGptImage2Image({
+      prompt,
+      images: images.length > 0 ? images : null,
+      aspectRatio,
+      imageSize,
+    })
+    const img = result.generated_image
+    return { generated_image: img.includes(',') ? img.split(',')[1] : img }
+  }
+
+  if (SEEDREAM_MODELS.has(model)) {
+    const sizeKey = imageSize === '3K' ? '3K' : '2K'
+    const size = SEEDREAM_SIZE_MAP[sizeKey]?.[aspectRatio] || sizeKey
+    const image = images.length === 0 ? null : images.length === 1 ? images[0] : images
+    const result = await generateSeedreamImage({ prompt, image, size, outputFormat: 'png', watermark: false, model })
+    const img = result.generated_image
+    return { generated_image: img.includes(',') ? img.split(',')[1] : img }
+  }
+
+  // Gemini: single image only
+  const targetImage = images[0] || null
   const response = await fetch(`${getGenerateApiBase()}/generate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ target_image: targetImageBase64, prompt, aspect_ratio: aspectRatio, image_size: imageSize, model }),
+    body: JSON.stringify({ target_image: targetImage, prompt, aspect_ratio: aspectRatio, image_size: imageSize, model }),
   });
   if (!response.ok) {
     let detail = '图片生成失败';
@@ -104,6 +142,7 @@ export const generateSeedreamImage = async ({
   size = '2K',
   outputFormat = 'png',
   watermark = false,
+  model = null,
 }) => {
   let response;
   try {
@@ -117,6 +156,7 @@ export const generateSeedreamImage = async ({
         output_format: outputFormat,
         response_format: 'b64_json',
         watermark,
+        ...(model ? { model } : {}),
       }),
     });
   } catch (error) {
@@ -125,6 +165,41 @@ export const generateSeedreamImage = async ({
 
   if (!response.ok) {
     let detail = '豆包图片生成失败';
+    try { const error = await response.json(); detail = error.detail || detail; } catch {}
+    throw new Error(detail);
+  }
+
+  return response.json();
+};
+
+export const generateGptImage2Image = async ({
+  prompt,
+  images = null,
+  aspectRatio = '1:1',
+  imageSize = '1K',
+  quality = 'auto',
+  outputFormat = 'png',
+}) => {
+  let response;
+  try {
+    response = await fetch(`${getGptImage2ApiBase()}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        images: images && images.length > 0 ? images : null,
+        aspect_ratio: aspectRatio,
+        image_size: imageSize,
+        quality,
+        output_format: outputFormat,
+      }),
+    });
+  } catch (error) {
+    throw new Error('无法连接 GPT Image 2 服务，请确认前后端服务正在运行。');
+  }
+
+  if (!response.ok) {
+    let detail = 'GPT Image 2 生成失败';
     try { const error = await response.json(); detail = error.detail || detail; } catch {}
     throw new Error(detail);
   }

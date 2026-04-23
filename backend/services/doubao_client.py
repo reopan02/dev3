@@ -32,12 +32,13 @@ class DoubaoClient:
         output_format: str = "png",
         response_format: str = "b64_json",
         watermark: bool = False,
+        model: Optional[str] = None,
     ) -> str:
         if not self.api_key:
             raise ValueError("DOUBAO_API_KEY 未配置")
 
         payload: dict = {
-            "model": self.model,
+            "model": model or self.model,
             "prompt": prompt,
             "size": size,
             "output_format": output_format,

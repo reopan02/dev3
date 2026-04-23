@@ -1,12 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react'
 import GlassCard from '../components/GlassCard'
-import ImageUpload from '../components/ImageUpload'
+import MultiImageUploader from '../components/MultiImageUploader'
 import ImagePreview from '../components/ImagePreview'
 import { ASPECT_RATIO_OPTIONS, QUALITY_OPTIONS } from '../constants/imageOptions'
 import { generateImage, downloadBase64Image, recognizeProductStream } from '../services/api'
 
+const SEEDREAM_MODELS = new Set(['doubao-seedream-5-0-260128'])
+const SEEDREAM_ASPECT_RATIOS = new Set(['1:1', '4:3', '3:4', '16:9', '9:16', '3:2', '2:3', '21:9'])
+const SEEDREAM_QUALITY_OPTIONS = [{ value: '2K', label: '2K' }, { value: '3K', label: '3K' }]
+
+const GPT2_ASPECT_RATIOS = new Set(['1:1', '4:3', '3:4', '16:9', '9:16', '3:2', '2:3'])
+const GPT2_QUALITY_OPTIONS = [
+  { value: '1K', label: '标准 (1024px)' },
+  { value: '2K', label: '2K (2048px)' },
+  { value: '4K', label: '4K (3840px)' },
+]
+
 const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized }) => {
-  const [targetImagePreview, setTargetImagePreview] = useState(null)
   const [localPrompt, setLocalPrompt] = useState(tabData.prompt || '')
   const [recognizing, setRecognizing] = useState(false)
   const [recognizeError, setRecognizeError] = useState(null)
@@ -14,6 +24,10 @@ const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized
   const [concurrency, setConcurrency] = useState(1)
   const [progress, setProgress] = useState({ done: 0, total: 0 })
   const abortControllerRef = useRef(null)
+
+  const isSeedreamModel = SEEDREAM_MODELS.has(tabData.model)
+  const isGpt2Model = tabData.model === 'gpt-image-2'
+  const isNonGemini = isSeedreamModel || isGpt2Model
 
   useEffect(() => {
     return () => {
@@ -30,21 +44,20 @@ const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized
     }
   }, [prompt])
 
-  const handleImageSelect = async (file) => {
-    try {
-      onUpdateTab({ error: null })
-      if (targetImagePreview) {
-        URL.revokeObjectURL(targetImagePreview)
-      }
-      const previewUrl = URL.createObjectURL(file)
-      setTargetImagePreview(previewUrl)
-
-      const reader = new FileReader()
-      reader.onload = () => onUpdateTab({ targetImage: reader.result })
-      reader.readAsDataURL(file)
-    } catch (err) {
-      onUpdateTab({ error: '图片加载失败' })
+  useEffect(() => {
+    const updates = {}
+    if (isSeedreamModel) {
+      if (!SEEDREAM_ASPECT_RATIOS.has(tabData.aspectRatio)) updates.aspectRatio = '3:4'
+      if (tabData.imageSize !== '2K' && tabData.imageSize !== '3K') updates.imageSize = '2K'
+    } else if (isGpt2Model) {
+      if (!GPT2_ASPECT_RATIOS.has(tabData.aspectRatio)) updates.aspectRatio = '3:4'
+      if (!['1K', '2K', '4K'].includes(tabData.imageSize)) updates.imageSize = '1K'
     }
+    if (Object.keys(updates).length > 0) onUpdateTab(updates)
+  }, [tabData.model])
+
+  const handleImagesChange = (newImages) => {
+    onUpdateTab({ targetImages: newImages, error: null })
   }
 
   const handleGenerate = async () => {
@@ -62,8 +75,10 @@ const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized
       generatedImages: null,
     })
 
+    const targetImages = textOnlyMode ? [] : (tabData.targetImages || []).map(item => item.dataUrl)
+
     const runOne = () => generateImage(
-      textOnlyMode ? null : tabData.targetImage,
+      targetImages,
       localPrompt,
       tabData.aspectRatio,
       tabData.imageSize,
@@ -100,7 +115,8 @@ const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized
   }
 
   const handleRecognize = async () => {
-    if (!tabData.targetImage) {
+    const images = tabData.targetImages || []
+    if (images.length === 0) {
       setRecognizeError('请先上传目标角色图片')
       return
     }
@@ -115,14 +131,10 @@ const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized
 
     let accumulated = ''
     await recognizeProductStream(
-      tabData.targetImage,
-      (chunk) => {
-        accumulated += chunk
-      },
+      images[0].dataUrl,
+      (chunk) => { accumulated += chunk },
       () => {
-        if (onProductInfoRecognized) {
-          onProductInfoRecognized(accumulated)
-        }
+        if (onProductInfoRecognized) onProductInfoRecognized(accumulated)
         setRecognizing(false)
       },
       (err) => {
@@ -134,6 +146,21 @@ const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized
   }
 
   const isGenerating = tabData.status === 'generating'
+  const targetImages = tabData.targetImages || []
+
+  const aspectRatioOptions = isSeedreamModel
+    ? ASPECT_RATIO_OPTIONS.filter(o => SEEDREAM_ASPECT_RATIOS.has(o.value))
+    : isGpt2Model
+      ? ASPECT_RATIO_OPTIONS.filter(o => GPT2_ASPECT_RATIOS.has(o.value))
+      : ASPECT_RATIO_OPTIONS
+
+  const qualityOptions = isSeedreamModel
+    ? SEEDREAM_QUALITY_OPTIONS
+    : isGpt2Model
+      ? GPT2_QUALITY_OPTIONS
+      : QUALITY_OPTIONS
+
+  const maxImages = isGpt2Model ? 16 : 4
 
   return (
     <GlassCard
@@ -146,7 +173,7 @@ const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized
         <div>
           <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>文生图模式</div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-            {textOnlyMode ? '当前仅使用提示词生成，不读取目标角色图。' : '当前会结合目标角色图与提示词共同生成。'}
+            {textOnlyMode ? '当前仅使用提示词生成，不读取参考图。' : '当前会结合参考图与提示词共同生成。'}
           </div>
         </div>
         <button
@@ -162,13 +189,15 @@ const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized
 
       {!textOnlyMode && (
         <>
-          <ImageUpload onImageSelect={handleImageSelect} disabled={isGenerating} />
+          <MultiImageUploader
+            label={`参考图（可选，最多 ${maxImages} 张）`}
+            value={targetImages}
+            onChange={handleImagesChange}
+            maxCount={maxImages}
+            disabled={isGenerating}
+          />
 
-          <div style={{ marginTop: '16px' }}>
-            <ImagePreview image={targetImagePreview} loading={false} placeholder="上传目标角色图片后显示" />
-          </div>
-
-          {tabData.targetImage && (
+          {targetImages.length > 0 && (
             <div style={{ marginTop: '12px' }}>
               <button className="glass-button" onClick={handleRecognize} disabled={recognizing || isGenerating} style={{ width: '100%' }}>
                 {recognizing ? <><span className="loading-spinner" />识别中...</> : '识别角色信息到左侧输入框'}
@@ -185,18 +214,20 @@ const GenerationPanel = ({ prompt, tabData, onUpdateTab, onProductInfoRecognized
           <select className="studio-select" value={tabData.model || 'gemini-3-pro-image-preview'} onChange={(e) => onUpdateTab({ model: e.target.value })} disabled={isGenerating}>
             <option value="gemini-3-pro-image-preview">Gemini 3 Pro</option>
             <option value="gemini-3.1-flash-image-preview">Gemini 3.1 Flash</option>
+            <option value="doubao-seedream-5-0-260128">Seedream 5.0</option>
+            <option value="gpt-image-2">GPT Image 2</option>
           </select>
         </div>
         <div>
           <label className="r2r-label">宽高比</label>
           <select className="studio-select" value={tabData.aspectRatio} onChange={(e) => onUpdateTab({ aspectRatio: e.target.value })} disabled={isGenerating}>
-            {ASPECT_RATIO_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            {aspectRatioOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </div>
         <div>
           <label className="r2r-label">清晰度</label>
           <select className="studio-select" value={tabData.imageSize} onChange={(e) => onUpdateTab({ imageSize: e.target.value })} disabled={isGenerating}>
-            {QUALITY_OPTIONS.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
+            {qualityOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
           </select>
         </div>
       </div>

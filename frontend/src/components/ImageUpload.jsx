@@ -71,36 +71,48 @@ const ImageUpload = ({ onImageSelect, disabled = false }) => {
       onFocus={handleFocus}
       onBlur={handleBlur}
       tabIndex={disabled ? -1 : 0}
-      style={{ opacity: disabled ? 0.4 : 1, cursor: disabled ? 'not-allowed' : 'pointer', textAlign: 'center' }}
+      style={{ opacity: disabled ? 0.4 : 1, cursor: disabled ? 'not-allowed' : 'pointer' }}
     >
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileInput} style={{ display: 'none' }} disabled={disabled} />
-
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.35, marginBottom: '12px', display: 'block', margin: '0 auto 12px' }}>
-        <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
-        <circle cx="9" cy="9" r="2"/>
-        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
-      </svg>
-
-      {isProcessing ? (
-        <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>处理中...</div>
-      ) : (
-        <>
-          <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px' }}>
-            {isFocused ? '已激活 — 按 Ctrl+V 粘贴图片' : '拖拽图片到此处，或点击激活粘贴'}
+      <div className="upload-placeholder upload-placeholder-large">
+        <div className="upload-icon-shell">
+          <div className="upload-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+              <circle cx="9" cy="9" r="2"/>
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+            </svg>
           </div>
-          <button
-            className="glass-button"
-            onClick={handleUploadClick}
-            disabled={disabled}
-            style={{ padding: '7px 14px', fontSize: '12px', minHeight: '36px' }}
-          >
-            选择图片文件
-          </button>
-        </>
-      )}
+        </div>
 
-      <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '10px' }}>
-        JPG · PNG · 最大 10MB
+        {isProcessing ? (
+          <div className="upload-copy">
+            <div className="upload-title">处理中</div>
+            <div className="upload-text">正在校验并压缩图片，请稍等。</div>
+          </div>
+        ) : (
+          <>
+            <div className="upload-copy">
+              <div className="upload-title">上传图片素材</div>
+              <div className="upload-text">
+                {isFocused ? '已激活，可直接粘贴图片。' : '拖拽图片到此处，或点击后激活粘贴。'}
+              </div>
+            </div>
+            <div className="upload-actions">
+              <button
+                className="glass-button upload-primary-btn"
+                onClick={handleUploadClick}
+                disabled={disabled}
+              >
+                选择图片文件
+              </button>
+              <span className="upload-chip">JPG / PNG</span>
+              <span className="upload-chip">Max 10MB</span>
+            </div>
+          </>
+        )}
+
+        <div className="upload-hint">支持拖拽、点击选择，以及 Ctrl+V 粘贴截图。</div>
       </div>
     </div>
   );

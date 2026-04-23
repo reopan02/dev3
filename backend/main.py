@@ -12,7 +12,7 @@ _root_env = Path(__file__).parent.parent / ".env"
 load_dotenv(_root_env)
 
 from config import get_settings
-from routers import generate, refer, seedream, watermark
+from routers import generate, refer, seedream, watermark, gptimage2
 
 app = FastAPI(title="AI Studio", version="1.0.0")
 
@@ -28,6 +28,7 @@ app.include_router(generate.router)
 app.include_router(refer.router)
 app.include_router(seedream.router)
 app.include_router(watermark.router)
+app.include_router(gptimage2.router)
 
 
 @app.get("/app-config.js", include_in_schema=False)
@@ -38,6 +39,7 @@ async def app_config():
         "referApiBase": settings.frontend_refer_api_path,
         "watermarkApiBase": settings.frontend_watermark_api_path,
         "seedreamApiBase": settings.frontend_seedream_api_path,
+        "gptimage2ApiBase": settings.frontend_gptimage2_api_path,
     }
     config_json = json.dumps(public_config, ensure_ascii=False)
     content = (

@@ -120,14 +120,21 @@ export default function ImageUploader({ label, value, onChange }) {
           </div>
         ) : (
           <div className="upload-placeholder">
-            <div className="upload-icon">
-              <UploadIcon />
+            <div className="upload-icon-shell">
+              <div className="upload-icon">
+                <UploadIcon />
+              </div>
             </div>
-            <div className="upload-text">
-              <button type="button" className="upload-btn" onClick={(e) => { e.stopPropagation(); handleClick() }}>
-                点击上传
+            <div className="upload-copy">
+              <div className="upload-title">上传参考图</div>
+              <div className="upload-text">点击选择文件，或直接拖拽图片到这里。</div>
+            </div>
+            <div className="upload-actions">
+              <button type="button" className="glass-button upload-primary-btn" onClick={(e) => { e.stopPropagation(); handleClick() }}>
+                选择图片
               </button>
-              <span> 或拖拽图片到此处</span>
+              <span className="upload-chip">JPG / PNG</span>
+              <span className="upload-chip">Paste Ready</span>
             </div>
             <div className="upload-hint">
               {active ? (
@@ -135,10 +142,10 @@ export default function ImageUploader({ label, value, onChange }) {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
-                  已激活 — Ctrl+V 粘贴图片
+                  已激活，可直接粘贴图片
                 </span>
               ) : (
-                '点击此区域激活粘贴功能'
+                '点击区域后可使用 Ctrl+V 粘贴图片'
               )}
             </div>
           </div>

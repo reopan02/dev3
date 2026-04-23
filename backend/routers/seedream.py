@@ -90,6 +90,7 @@ async def generate_seedream_image(request: SeedreamGenerateRequest):
             output_format=request.output_format,
             response_format=request.response_format,
             watermark=request.watermark,
+            model=request.model,
         )
         if isinstance(generated_image, bytes):
             generated_image = base64.b64encode(generated_image).decode("utf-8")

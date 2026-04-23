@@ -7,7 +7,7 @@ function GenerationTabContainer({ prompt, onProductInfoRecognized }) {
     {
       id: 'tab-1',
       label: 'Generation 1',
-      targetImage: null,
+      targetImages: [],
       prompt: '',
       aspectRatio: '3:4',
       imageSize: '2K',
@@ -28,7 +28,7 @@ function GenerationTabContainer({ prompt, onProductInfoRecognized }) {
     const newTab = {
       id: `tab-${Date.now()}`,
       label: `Generation ${newTabNumber}`,
-      targetImage: null,
+      targetImages: [],
       prompt: prompt || '',
       aspectRatio: '3:4',
       imageSize: '2K',
